@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RouteMate Survey – UTM Campus Carpooling</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07101f;
+  --card: #0d1b2e;
+  --card2: #122038;
+  --accent: #2d7ef7;
+  --accent2: #00c2ff;
+  --accent3: #7c3aed;
+  --green: #10b981;
+  --red: #ef4444;
+  --text: #e8f0fe;
+  --muted: #6b87a8;
+  --border: rgba(45,126,247,0.18);
+  --radius: 14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 70% 45% at 15% 5%,rgba(45,126,247,.13) 0%,transparent 60%),
+    radial-gradient(ellipse 55% 35% at 85% 85%,rgba(124,58,237,.1) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 50% at 55% 45%,rgba(0,194,255,.05) 0%,transparent 60%);
+  pointer-events:none;z-index:0;
+}
+
+/* ── LAYOUT ── */
+.wrap{max-width:720px;margin:0 auto;padding:44px 18px 90px;position:relative;z-index:1}
+
+/* ── HEADER ── */
+.hdr{text-align:center;margin-bottom:44px;animation:fadeDown .65s ease both}
+.badge{
+  display:inline-flex;align-items:center;gap:9px;
+  background:rgba(45,126,247,.1);border:1px solid rgba(45,126,247,.28);
+  border-radius:50px;padding:7px 18px;margin-bottom:22px;
+  font-size:12px;font-weight:500;color:var(--accent2);letter-spacing:.06em;text-transform:uppercase;
+}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:blink 1.8s infinite}
+h1{
+  font-family:'Syne',sans-serif;font-size:clamp(1.9rem,5vw,3rem);font-weight:800;line-height:1.08;
+  background:linear-gradient(130deg,#fff 0%,var(--accent2) 55%,var(--accent3) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:14px;
+}
+.sub{color:var(--muted);font-size:14.5px;line-height:1.7;max-width:480px;margin:0 auto 26px}
+.pills{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.pill{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:50px;padding:5px 14px;font-size:12px;color:var(--muted)}
+
+/* ── PROGRESS ── */
+.prog-wrap{margin-bottom:38px;animation:fadeDown .7s ease both}
+.prog-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:7px}
+.prog-track{height:5px;background:var(--card2);border-radius:50px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:50px;transition:width .5s cubic-bezier(.4,0,.2,1);box-shadow:0 0 12px rgba(45,126,247,.45);width:0%}
+
+/* ── SECTION LABEL ── */
+.sec{
+  font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--accent);margin:36px 0 18px;
+  display:flex;align-items:center;gap:10px;
+}
+.sec::after{content:'';flex:1;height:1px;background:var(--border)}
+.sec:first-of-type{margin-top:0}
+
+/* ── QUESTION CARD ── */
+.qcard{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:24px 24px 22px;margin-bottom:14px;
+  transition:border-color .2s,box-shadow .2s;
+  animation:fadeUp .45s ease both;
+}
+.qcard:hover{border-color:rgba(45,126,247,.35);box-shadow:0 0 22px rgba(45,126,247,.07)}
+.qcard.answered{border-color:rgba(16,185,129,.3)}
+.qcard.error{border-color:rgba(239,68,68,.5)!important;box-shadow:0 0 18px rgba(239,68,68,.1)!important}
+.qlabel{font-size:11.5px;color:var(--muted);margin-bottom:6px;font-weight:500}
+.qtext{font-size:15px;font-weight:500;line-height:1.55;margin-bottom:18px}
+.req{color:var(--accent);margin-left:3px}
+.opt-note{font-size:12px;color:var(--muted);margin-left:6px;font-weight:400}
+
+/* ── RADIO / CHECKBOX ── */
+.opts{display:flex;flex-direction:column;gap:8px}
+.opts.row{flex-direction:row;flex-wrap:wrap}
+.opt{
+  display:flex;align-items:center;gap:11px;padding:11px 15px;
+  background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);
+  border-radius:10px;cursor:pointer;transition:all .16s;
+  font-size:14px;color:var(--muted);user-select:none;
+}
+.opt:hover{background:rgba(45,126,247,.08);border-color:rgba(45,126,247,.3);color:var(--text)}
+.opt.sel{background:rgba(45,126,247,.12);border-color:var(--accent);color:var(--text)}
+.opt.sel .ctl{background:var(--accent);border-color:var(--accent)}
+.opt.sel .ctl.r::after{opacity:1;transform:scale(1)}
+.opt.sel .ctl.c::after{opacity:1}
+.ctl{
+  width:17px;height:17px;min-width:17px;border:2px solid rgba(255,255,255,.2);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  transition:all .16s;position:relative;
+}
+.ctl.c{border-radius:5px}
+.ctl.r::after{content:'';width:7px;height:7px;background:#fff;border-radius:50%;opacity:0;transform:scale(.4);transition:all .16s}
+.ctl.c::after{content:'✓';font-size:10px;color:#fff;opacity:0;transition:opacity .16s}
+input[type=radio],input[type=checkbox]{display:none}
+
+/* ── SCALE ── */
+.scale-row{display:flex;gap:7px}
+.scale-lbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:7px}
+.sbtn{
+  flex:1;height:42px;border-radius:8px;border:1px solid rgba(255,255,255,.09);
+  background:rgba(255,255,255,.03);color:var(--muted);
+  font-family:'Syne',sans-serif;font-size:15px;font-weight:700;
+  cursor:pointer;transition:all .16s;
+}
+.sbtn:hover{background:rgba(45,126,247,.1);border-color:rgba(45,126,247,.35);color:var(--text)}
+.sbtn.sel{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent;color:#fff;box-shadow:0 3px 14px rgba(45,126,247,.35)}
+
+/* ── SUBMIT ── */
+.submit-wrap{text-align:center;margin-top:38px;animation:fadeUp .55s ease both}
+.btn-sub{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;border:none;border-radius:12px;padding:15px 50px;
+  font-family:'Syne',sans-serif;font-size:16px;font-weight:700;
+  cursor:pointer;transition:all .2s;box-shadow:0 4px 22px rgba(45,126,247,.3);
+}
+.btn-sub:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(45,126,247,.4)}
+.btn-sub:active{transform:none}
+.btn-sub:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.sub-note{font-size:12px;color:var(--muted);margin-top:11px}
+
+/* ── THANK YOU ── */
+.ty{display:none;text-align:center;padding:80px 20px;animation:fadeUp .6s ease both}
+.ty.show{display:block}
+.ty-icon{
+  width:78px;height:78px;background:linear-gradient(135deg,var(--green),#34d399);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:34px;margin:0 auto 24px;box-shadow:0 0 40px rgba(16,185,129,.3);
+  animation:pop .5s cubic-bezier(.17,.67,.34,1.5) both;
+}
+.ty h2{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;margin-bottom:12px}
+.ty p{color:var(--muted);line-height:1.75;max-width:380px;margin:0 auto}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);
+  background:#1a1a2e;border:1px solid rgba(239,68,68,.4);color:#fca5a5;
+  padding:12px 22px;border-radius:10px;font-size:13.5px;font-weight:500;
+  z-index:999;transition:transform .3s;white-space:nowrap;
+  box-shadow:0 4px 20px rgba(0,0,0,.4);
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeDown{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+
+/* stagger */
+.qcard:nth-child(1){animation-delay:.04s}
+.qcard:nth-child(2){animation-delay:.08s}
+.qcard:nth-child(3){animation-delay:.12s}
+.qcard:nth-child(4){animation-delay:.16s}
+.qcard:nth-child(5){animation-delay:.20s}
+.qcard:nth-child(6){animation-delay:.24s}
+
+@media(max-width:520px){
+  h1{font-size:1.7rem}
+  .qcard{padding:18px 16px}
+  .scale-row{gap:5px}
+  .sbtn{font-size:13px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="badge"><span class="dot"></span>UTM Campus Research 2025</div>
+    <h1>RouteMate Survey</h1>
+    <p class="sub">Help us understand campus transportation needs. Your honest feedback shapes a smarter, more affordable campus ride-sharing experience.</p>
+    <div class="pills">
+      <span class="pill">⏱ 3–5 minutes</span>
+      <span class="pill">🔒 Anonymous</span>
+      <span class="pill">🎓 Academic Research Only</span>
+      <span class="pill">25 Questions</span>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="prog-wrap">
+    <div class="prog-meta">
+      <span id="ptext">0 of 25 answered</span>
+      <span id="ppct">0%</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="pfill"></div></div>
+  </div>
+
+  <!-- FORM -->
+  <div id="fbody">
+
+    <!-- S1 -->
+    <div class="sec">Section 1 — About You</div>
+
+    <div class="qcard" data-q="q1">
+      <div class="qlabel">Q1 of 25 · Required</div>
+      <div class="qtext">Are you a UTM student or staff?<span class="req">*</span></div>
+      <div class="opts row">
+        <label class="opt"><input type="radio" name="q1" value="Student"><div class="ctl r"></div>Student</label>
+        <label class="opt"><input type="radio" name="q1" value="Staff"><div class="ctl r"></div>Staff</label>
+      </div>
+    </div>
+
+    <div class="qcard" data-q="q2">
+      <div class="qlabel">Q2 of 25 · Required</div>
+      <div class="qtext">Where do you usually stay?<span class="req">*</span></div>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q2" value="On-campus residential college"><div class="ctl r"></div>On-campus residential college</label>
+        <label class="opt"><input type="radio" name="q2" value="Off-campus residential area"><div class="ctl r"></div>Off-campus residential area</label>
+      </div>
+    </div>
+
+    <div class="qcard" data-q="q3">
+      <div class="qlabel">Q3 of 25 · Required</div>
+      <div class="qtext">Do you own or regularly have access to a private vehicle?<span class="req">*</span></div>
+      <div class="opts row">
+        <label class="opt"><input type="radio" name="q3" value="Yes"><div class="ctl r"></div>Yes</label>
+        <label class="opt"><input type="radio" name="q3" value="No"><div class="ctl r"></div>No</label>
+      </div>
+    </div>
+
+    <!-- S2 -->
+    <div class="sec">Section 2 — Transportation Habits</div>
+
+    <div class="qcard" data-q="q4">
+      <div class="qlabel">Q4 of 25 · Required</div>
+      <div class="qtext">How often do you use Grab each week?<span class="req">*</span></div>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q4" value="Never"><div class="ctl r"></div>Never</label>
+        <label class="opt"><input type="radio" name="q4" value="1–2 times"><div class="ctl r"></div>1–2 times</label>
+        <label class="opt"><input type="radio" name="q4" value="3–5 times"><div class="ctl r"></div>3–5 times</label>
+        <label class="opt"><input type="radio" name="q4" value="More than 5 times"><div class="ctl r"></div>More than 5 times</label>
+      </div>
+    </div>
+
+    <div class="qcard" data-q="q5">
+      <div class="qlabel">Q5 of 25 · Required</div>
+      <div class="qtext">How much do you spend on transportation per week?<span class="req">*</span></div>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q5" value="Less than RM10"><div class="ctl r"></div>Less than RM10</label>
+        <label class="opt"><input type="radio" name="q5" value="RM10–RM20"><div class="ctl r"></div>RM10–RM20</label>
+        <label class="opt"><input type="radio" name="q5" value="RM21–RM30"><div class="ctl r"></div>RM21–RM30</label>
+        <label class="opt"><input type="radio" name="q5" value="RM31–RM50"><div class="ctl r"></div>RM31–RM50</label>
+        <label class="opt"><input type="radio" name="q5" value="More than RM50"><div class="ctl r"></div>More than RM50</label>
+      </div>
+    </div>
+
+    <div class="qcard" data-q="q6">
+      <div class="qlabel">Q6 of 25 · Required</div>
+      <div class="qtext">What is your most frequently used transportation method?<span class="req">*</span></div>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q6" value="Walking"><div class="ctl r"></div>Walking</label>
+        <label class="opt"><input type="radio" name="q6" value="Campus Bus"><div class="ctl r"></div>Campus Bus</label>
+        <label class="opt"><input type="radio" name="q6" value="Grab"><div class="ctl r"></div>Grab</label>
+        <label class="opt"><input type="radio" name="q6" value="Personal Vehicle"><div class="ctl r"></div>Personal Vehicle</label>
+        <label class="opt"><input type="radio" name="q6" value="Motorcycle"><div class="ctl r"></div>Motorcycle</label>
+        <label class="opt"><input type="radio" name="q6" value="Other"><div class="ctl r"></div>Other</label>
+      </div>
+    </div>
+
+    <div class="qcard" data-q="q7">
+      <div class="qlabel">Q7 of 25 · Required · Linear Scale</div>
+      <div class="qtext">Do you think transportation costs around UTM are expensive?<span class="req">*</span></div>
+      <div class="scale-row" id="sr7"></div>
+      <div class="scale-lbl"><span>1 — Strongly Disagree</span><span>5 — Strongly Agree</span></div>
+    </div>
+
+    <!-- S3 -->
+    <div class="sec">Section 3 — Demand Validation</div>
+
+    <div class="qcard" data-q="q8">
+      <div class="qlabel">Q8 of 25 · Required</div>
+      <div class="qtext">Would you use a campus carpooling service if trips cost RM2–RM4?<span class="req">*</span></div>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q8" value="Definitely Yes"><div class="ctl r"></div>Definitely Yes</label>
+        <label class="opt"><input type="radio" name="q8" value="Probably Yes"><div class="ctl r"></div>Probably Yes</label>
+        <label class="opt"><input type="radio" name="q8" value="Not Sure"><div class="ctl r"></div>Not Sure</label>
+        <label class="opt"><input type="radio" name="q8" value="Probably No"><div class="ctl r"></div>Probably No</label>
+        <label class="opt"><input type="radio" name="q8" value="Definitely No"><div class="ctl r"></div>Definitely No</label>
+      </div>
+    </div>
+
+    <div class="qcard" data-q="q9">
+      <div class="qlabel">Q9 of 25 · Required</div>
+      <div class="qtext">Would you choose RouteMate instead of Grab for short-distance trips if it is cheaper?<span class="req">*</span></div>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q9" value="Definitely Yes"><div class="ctl r"></div>Definitely Yes</label>
+        <label class="opt"><input type="radio" name="q9" value="Probably Yes"><div class="ctl r"></div>Probably Yes</label>
+        <label class="opt"><input type="radio" name="q9" value="Not Sure"><div class="ctl r"></div>Not Sure</label>
+        <label class="opt"><input type="radio" name="q9" value="Probably No"><div class="ctl r"></div>Probably No</label>
+        <label class="opt"><input type="radio" name="q9" value="Definitely No"><div class="ctl r"></div>Definitely No</label>
+      </div>
+    </div>
+
+    <!-- S4 -->
+    <div class="sec">Section 4 — Carpooling Acceptance</div>
+
+    <div class="qcard" data-q="q10">
+      <div class="qlabel">Q10 of 25 · Required</div>
+      <div class="qtext">Would you be willing to use a campus carpooling platform such as RouteMate?<span class="req">*</span></div>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q10" value="Definitely Yes"><div class="ctl r"></div>Definitely Yes</label>
+        <label class="opt"><input type="radio" name="q10" value="Probably Yes"><div class="ctl r"></div>Probably Yes</label>
+        <label class="opt"><input type="radio" name="q10" value="Not Sure"><div class="ctl r"></div>Not Sure</label>
+        <label class="opt"><input type="radio" name="q10" value="Probably No"><div class="ctl r"></div>Probably No</label>
+        <label class="opt"><input type="radio" name="q10" value="Definitely No"><div class="ctl r"></div>Definitely No</label>
+      </div>
+    </div>
+
+    <div class="qcard" data-q="q11">
+      <div class="qlabel">Q11 of 25 · Required</div>
+      <div class="qtext">Would you be comfortable sharing a ride with verified UTM students or staff?<span class="req">*</span></div>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q11" value="Definitely Yes"><div class="ctl r"></div>Definitely Yes</label>
+        <label class="opt"><input type="radio" name="q11" value="Probably Yes"><div class="ctl r"></div>Probably Yes</label>
+        <label class="opt"><input type="radio" name="q11" value="Not Sure"><div class="ctl r"></div>Not Sure</label>
+        <label class="opt"><input type="radio" name="q11" value="Probably No"><div class="ctl r"></div>Probably No</label>
+        <label class="opt"><input type="radio" name="q11" value="Definitely No"><div class="ctl r"></div>Definitely No</label>
+      </div>
+    </div>
+
+    <div class="qcard" data-q="q12">
+      <div class="qlabel">Q12 of 25 · Required · Linear Scale</div>
+      <div class="qtext">Do you think a campus carpooling platform would benefit the UTM community?<span class="req">*</span></div>
+      <div class="scale-row" id="sr12"></div>
+      <div class="scale-lbl"><span>1 — Strongly Disagree</span><span>5 — Strongly Agree</span></div>
+    </div>
+
+    <!-- S5 -->
+    <div class="sec">Section 5 — Hotspot Validation</div>
+
+    <div class="qcard" data-q="q13">
+      <div class="qlabel">Q13 of 25 · Required</div>
+      <div class="qtext">Would you be willing to use predefined pickup and drop-off points instead of entering exact addresses?<span class="req">*</span></div>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q13" value="Definitely Yes"><div class="ctl r"></div>Definitely Yes</label>
+        <label class="opt"><input type="radio" name="q13" value="Probably Yes"><div class="ctl r"></div>Probably Yes</label>
+        <label class="opt"><input type="radio" name="q13" value="Not Sure"><div class="ctl r"></div>Not Sure</label>
+        <label class="opt"><input type="radio" name="q13" value="Probably No"><div class="ctl r"></div>Probably No</label>
+        <label class="opt"><input type="radio" name="q13" value="Definitely No"><div class="ctl r"></div>Definitely No</label>
+      </div>
+    </div>
+
+    <div class="qcard" data-q="q14">
+      <div class="qlabel">Q14 of 25 · Required</div>
+      <div class="qtext">Which pickup method do you prefer?<span class="req">*</span></div>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q14" value="Fixed hotspot locations"><div class="ctl r"></div>Fixed hotspot locations</label>
+        <label class="opt"><input type="radio" name="q14" value="Exact address input"><div class="ctl r"></div>Exact address input</label>
+        <label class="opt"><input type="radio" name="q14" value="No preference"><div class="ctl r"></div>No preference</label>
+      </div>
+    </div>
+
+    <div class="qcard" data-q="q15">
+      <div class="qlabel">Q15 of 25 · Required · Linear Scale</div>
+      <div class="qtext">Do you think hotspot-based matching can improve ride-sharing efficiency?<span class="req">*</span></div>
+      <div class="scale-row" id="sr15"></div>
+      <div class="scale-lbl"><span>1 — Strongly Disagree</span><span>5 — Strongly Agree</span></div>
+    </div>
+
+    <div class="qcard" data-q="q16">
+      <div class="qlabel">Q16 of 25 · Optional</div>
+      <div class="qtext">Which advantages of hotspot-based matching do you find valuable?<span class="opt-note">(Select all that apply)</span></div>
+      <div class="opts">
+        <label class="opt"><input type="checkbox" name="q16" value="Easier pickup coordination"><div class="ctl c"></div>Easier pickup coordination</label>
+        <label class="opt"><input type="checkbox" name="q16" value="Faster matching"><div class="ctl c"></div>Faster matching</label>
+        <label class="opt"><input type="checkbox" name="q16" value="Less waiting time"><div class="ctl c"></div>Less waiting time</label>
+        <label class="opt"><input type="checkbox" name="q16" value="Reduced route deviation"><div class="ctl c"></div>Reduced route deviation</label>
+        <label class="opt"><input type="checkbox" name="q16" value="Simpler booking process"><div class="ctl c"></div>Simpler booking process</label>
+        <label class="opt"><input type="checkbox" name="q16" value="None"><div class="ctl c"></div>None of the above</label>
+      </div>
+    </div>
+
+    <!-- S6 -->
+    <div class="sec">Section 6 — For Vehicle Owners</div>
+
+    <div class="qcard" data-q="q17">
+      <div class="qlabel">Q17 of 25 · Optional</div>
+      <div class="qtext">How many empty seats are usually available during your trips?<span class="opt-note">(For vehicle owners)</span></div>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q17" value="1 seat"><div class="ctl r"></div>1 seat</label>
+        <label class="opt"><input type="radio" name="q17" value="2 seats"><div class="ctl r"></div>2 seats</label>
+        <label class="opt"><input type="radio" name="q17" value="3 seats"><div class="ctl r"></div>3 seats</label>
+        <label class="opt"><input type="radio" name="q17" value="More than 3 seats"><div class="ctl r"></div>More than 3 seats</label>
+        <label class="opt"><input type="radio" name="q17" value="Not applicable"><div class="ctl r"></div>Not applicable</label>
+      </div>
+    </div>
+
+    <div class="qcard" data-q="q18">
+      <div class="qlabel">Q18 of 25 · Optional</div>
+      <div class="qtext">Would you be willing to share available seats through RouteMate?<span class="opt-note">(For vehicle owners)</span></div>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q18" value="Definitely Yes"><div class="ctl r"></div>Definitely Yes</label>
+        <label class="opt"><input type="radio" name="q18" value="Probably Yes"><div class="ctl r"></div>Probably Yes</label>
+        <label class="opt"><input type="radio" name="q18" value="Not Sure"><div class="ctl r"></div>Not Sure</label>
+        <label class="opt"><input type="radio" name="q18" value="Probably No"><div class="ctl r"></div>Probably No</label>
+        <label class="opt"><input type="radio" name="q18" value="Definitely No"><div class="ctl r"></div>Definitely No</label>
+      </div>
+    </div>
+
+    <div class="qcard" data-q="q19">
+      <div class="qlabel">Q19 of 25 · Optional</div>
+      <div class="qtext">What would motivate you to become a RouteMate driver?<span class="opt-note">(Select all that apply)</span></div>
+      <div class="opts">
+        <label class="opt"><input type="checkbox" name="q19" value="Reduce fuel costs"><div class="ctl c"></div>Reduce fuel costs</label>
+        <label class="opt"><input type="checkbox" name="q19" value="Reduce parking costs"><div class="ctl c"></div>Reduce parking costs</label>
+        <label class="opt"><input type="checkbox" name="q19" value="Help other students"><div class="ctl c"></div>Help other students</label>
+        <label class="opt"><input type="checkbox" name="q19" value="Extra income"><div class="ctl c"></div>Extra income</label>
+        <label class="opt"><input type="checkbox" name="q19" value="Better vehicle utilization"><div class="ctl c"></div>Better vehicle utilization</label>
+        <label class="opt"><input type="checkbox" name="q19" value="Other"><div class="ctl c"></div>Other</label>
+      </div>
+    </div>
+
+    <div class="qcard" data-q="q20">
+      <div class="qlabel">Q20 of 25 · Optional</div>
+      <div class="qtext">What concerns would prevent you from becoming a RouteMate driver?<span class="opt-note">(Select all that apply)</span></div>
+      <div class="opts">
+        <label class="opt"><input type="checkbox" name="q20" value="Safety concerns"><div class="ctl c"></div>Safety concerns</label>
+        <label class="opt"><input type="checkbox" name="q20" value="Passenger no-show"><div class="ctl c"></div>Passenger no-show</label>
+        <label class="opt"><input type="checkbox" name="q20" value="Vehicle damage"><div class="ctl c"></div>Vehicle damage</label>
+        <label class="opt"><input type="checkbox" name="q20" value="Time inconvenience"><div class="ctl c"></div>Time inconvenience</label>
+        <label class="opt"><input type="checkbox" name="q20" value="Privacy concerns"><div class="ctl c"></div>Privacy concerns</label>
+        <label class="opt"><input type="checkbox" name="q20" value="No concerns"><div class="ctl c"></div>No concerns</label>
+      </div>
+    </div>
+
+    <!-- S7 -->
+    <div class="sec">Section 7 — Trust &amp; Safety</div>
+
+    <div class="qcard" data-q="q21">
+      <div class="qlabel">Q21 of 25 · Required · Linear Scale</div>
+      <div class="qtext">Would identity verification increase your confidence in using RouteMate?<span class="req">*</span></div>
+      <div class="scale-row" id="sr21"></div>
+      <div class="scale-lbl"><span>1 — Strongly Disagree</span><span>5 — Strongly Agree</span></div>
+    </div>
+
+    <div class="qcard" data-q="q22">
+      <div class="qlabel">Q22 of 25 · Required · Linear Scale</div>
+      <div class="qtext">Would a passenger credit score and driver reliability system improve trust in the platform?<span class="req">*</span></div>
+      <div class="scale-row" id="sr22"></div>
+      <div class="scale-lbl"><span>1 — Strongly Disagree</span><span>5 — Strongly Agree</span></div>
+    </div>
+
+    <div class="qcard" data-q="q23">
+      <div class="qlabel">Q23 of 25 · Required · Linear Scale</div>
+      <div class="qtext">Would you support penalties for users who repeatedly fail to show up?<span class="req">*</span></div>
+      <div class="scale-row" id="sr23"></div>
+      <div class="scale-lbl"><span>1 — Strongly Disagree</span><span>5 — Strongly Agree</span></div>
+    </div>
+
+    <div class="qcard" data-q="q24">
+      <div class="qlabel">Q24 of 25 · Required · Linear Scale</div>
+      <div class="qtext">Would GPS driver check-in make you feel safer when using RouteMate?<span class="req">*</span></div>
+      <div class="scale-row" id="sr24"></div>
+      <div class="scale-lbl"><span>1 — Strongly Disagree</span><span>5 — Strongly Agree</span></div>
+    </div>
+
+    <!-- S8 -->
+    <div class="sec">Section 8 — Usage Intention</div>
+
+    <div class="qcard" data-q="q25">
+      <div class="qlabel">Q25 of 25 · Required</div>
+      <div class="qtext">If RouteMate is available today, how likely are you to use it?<span class="req">*</span></div>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q25" value="Very Likely"><div class="ctl r"></div>Very Likely</label>
+        <label class="opt"><input type="radio" name="q25" value="Likely"><div class="ctl r"></div>Likely</label>
+        <label class="opt"><input type="radio" name="q25" value="Not Sure"><div class="ctl r"></div>Not Sure</label>
+        <label class="opt"><input type="radio" name="q25" value="Unlikely"><div class="ctl r"></div>Unlikely</label>
+        <label class="opt"><input type="radio" name="q25" value="Very Unlikely"><div class="ctl r"></div>Very Unlikely</label>
+      </div>
+    </div>
+
+    <div class="submit-wrap">
+      <button class="btn-sub" onclick="submit()">Submit Survey →</button>
+      <p class="sub-note">All responses are anonymous and used for academic research purposes only.</p>
+    </div>
+
+  </div><!-- /#fbody -->
+
+  <!-- THANK YOU -->
+  <div class="ty" id="ty">
+    <div class="ty-icon">✓</div>
+    <h2>Thank you!</h2>
+    <p>Your response has been recorded. You are helping build a smarter, more affordable campus transportation experience at UTM.</p>
+  </div>
+
+</div><!-- /.wrap -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Scale question IDs
+const SCALES = ['q7','q12','q15','q21','q22','q23','q24'];
+// Required question IDs
+const REQUIRED = ['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10',
+                  'q11','q12','q13','q14','q15','q21','q22','q23','q24','q25'];
+const scaleVal = {};
+
+// Build scale buttons
+SCALES.forEach(id => {
+  const row = document.getElementById('sr' + id.slice(1));
+  if (!row) return;
+  for (let i = 1; i <= 5; i++) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'sbtn';
+    b.textContent = i;
+    b.onclick = () => {
+      row.querySelectorAll('.sbtn').forEach(x => x.classList.remove('sel'));
+      b.classList.add('sel');
+      scaleVal[id] = i;
+      setAnswered(id);
+      updateProg();
+    };
+    row.appendChild(b);
+  }
+});
+
+// Radio / checkbox interactions
+document.querySelectorAll('input[type=radio]').forEach(inp => {
+  inp.addEventListener('change', () => {
+    const n = inp.name;
+    document.querySelectorAll(`input[name="${n}"]`).forEach(r =>
+      r.closest('.opt').classList.toggle('sel', r.checked));
+    setAnswered(n);
+    updateProg();
+  });
+});
+
+document.querySelectorAll('input[type=checkbox]').forEach(inp => {
+  inp.addEventListener('change', () => {
+    inp.closest('.opt').classList.toggle('sel', inp.checked);
+    setAnswered(inp.name);
+    updateProg();
+  });
+});
+
+function setAnswered(qid) {
+  const card = document.querySelector(`[data-q="${qid}"]`);
+  if (card) { card.classList.add('answered'); card.classList.remove('error'); }
+}
+
+function isAnswered(qid) {
+  if (SCALES.includes(qid)) return !!scaleVal[qid];
+  return !!document.querySelector(`input[name="${qid}"]:checked`);
+}
+
+function countAnswered() {
+  let n = 0;
+  for (let i = 1; i <= 25; i++) if (isAnswered('q' + i)) n++;
+  return n;
+}
+
+function updateProg() {
+  const n = countAnswered();
+  const pct = Math.round(n / 25 * 100);
+  document.getElementById('pfill').style.width = pct + '%';
+  document.getElementById('ptext').textContent = n + ' of 25 answered';
+  document.getElementById('ppct').textContent = pct + '%';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function submit() {
+  const missing = REQUIRED.filter(id => !isAnswered(id));
+  if (missing.length) {
+    missing.forEach(id => {
+      const c = document.querySelector(`[data-q="${id}"]`);
+      if (c) c.classList.add('error');
+    });
+    const first = document.querySelector(`[data-q="${missing[0]}"]`);
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    showToast(`⚠ Please complete ${missing.length} required question${missing.length > 1 ? 's' : ''} marked with ✱`);
+    return;
+  }
+  // Hide form, show thank you
+  document.getElementById('fbody').style.display = 'none';
+  document.querySelector('.hdr').style.display = 'none';
+  document.querySelector('.prog-wrap').style.display = 'none';
+  document.getElementById('ty').classList.add('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
